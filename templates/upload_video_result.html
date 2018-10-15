@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block header_js %}
+    <link rel="stylesheet" href="/static/plugins/datatables/dataTables.bootstrap.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+
+{% endblock %}
+
+{% block head_nav %}
+    <section class="content-header">
+        <h1>
+            视频识别结果
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> Home </a></li>
+            <li><a href=""> 上传文件 </a></li>
+            <li><a href="{% url 'upload_video' %}"> 上传视频 </a></li>
+            <li><a class="active"> 识别结果 </a></li>
+        </ol>
+    </section>
+{% endblock %}
+
+{% block navname %}upload{% endblock %}
+{% block navSon %}video{% endblock %}
+
+{% block content %}
+    <div class="box box-primary">
+    <h3>按基本表情分类</h3>
+        <div class="box-body">
+            <h3>人脸检测</h3>
+            <p>从视频中共抽取了{{ pic_num }}帧画面，</p>
+            <p>画面检测出最大人脸数为{{ face_max_num }}个,</p>
+            <p>共检测出人脸数为{{ face_single_num }}个</p>
+            <p>人脸检测率{{ detect_rate }}</p>
+            <h3>人脸表情分布</h3>
+            <div id="echartsPie" style="width: 600px;height:400px;"></div>
+        </div>
+    </div>
+<input id="results" value="{{ results }}" style="display:none">
+{% endblock %}
+
+{% block footer_js %}
+    <script src="/static/plugins/jquery.blockui.min.js"></script>
+    <script src="/static/plugins/datatables/jquery.dataTables.js"></script>
+    <script src="/static/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="/static/js/metronic.js"></script>
+    <script src="/static/js/table-ext.js"></script>
+    <script src="/static/js/datatable.js"></script>
+    <script src="/static/js/echarts.min.js" charset="utf-8" type="text/javascript"></script>
+    <script type="text/javascript">
+        var echartsPie;
+        var results =  JSON.parse($("#results").val());
+        var json = [
+            {value: results['angry'], name: '生气'},
+            {value: results['sad'], name: '难过'},
+            {value: results['neutral'], name: '中性'},
+            {value: results['disgust'], name: '反感'},
+            {value: results['surprise'], name: '惊讶'},
+            {value: results['fear'], name: '害怕'},
+            {value: results['happy'], name: '高兴'}
+        ];
+        var option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{b} : {c}"
+            },
+
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: {show: true},
+                    dataView: {show: true, readOnly: false},
+                    magicType: {
+                        show: true,
+                        type: ['pie', 'funnel'],
+                        option: {
+                            funnel: {
+                                x: '25%',
+                                width: '50%',
+                                funnelAlign: 'left',
+                                max: 1548
+                            }
+                        }
+                    },
+                    restore: {show: true},
+                    saveAsImage: {show: true}
+                }
+            },
+            calculable: true,
+            series: [
+                {
+                    name: '',
+                    type: 'pie',
+                    radius: '55%',//饼图的半径大小
+                    center: ['60%', '40%'],//饼图的位置
+                    data: json,
+                    itemStyle: {
+                        normal: {
+                            label: {
+                                show: true,
+                                formatter: '{b} : {c} \n ({d}%)'
+                            },
+                            labelLine: {
+                                show: true
+                            }
+                        }
+                    }
+                }
+            ]
+        };
+
+        echartsPie = echarts.init(document.getElementById('echartsPie'));
+        $(function () {
+            echartsPie.setOption(option);
+
+        });
+    </script>
+{% endblock %}
+

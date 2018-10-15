@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block header_js %}
+    <link rel="stylesheet" href="/static/plugins/datatables/dataTables.bootstrap.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+
+{% endblock %}
+
+{% block head_nav %}
+    <section class="content-header">
+        <h1>
+            图片测试
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="/"><i class="fa fa-dashboard"></i> Home </a></li>
+            <li><a href=""> 系统测试 </a></li>
+            <li class="active"> 图片测试</li>
+        </ol>
+    </section>
+{% endblock %}
+
+{% block navname %}test{% endblock %}
+{% block navSon %}pic{% endblock %}
+
+{% block content %}
+    <div class="box box-primary">
+    <h3>按基本表情分类</h3>
+        <div class="box-body">
+            {% for result in result_list %}
+                <div class="col-xs-6" style="margin-bottom: 20px; height: 300px">
+                    <div class="col-xs-4" style="margin-top: 80px">
+                        <img src="/static/media/test/pic/{{ result.pic_name }}" style="width: 100%">
+                        <h4 style="padding-left: 30px">{{ result.emotion }}</h4>
+                    </div>
+                    <div class="col-xs-8" style="height: 100%; padding: 0" id="chart{{ result.pic_name }}"></div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <input id="result" value="{{ result_json }}" style="display: none">
+{% endblock %}
+
+{% block footer_js %}
+    <script src="/static/plugins/jquery.blockui.min.js"></script>
+    <script src="/static/plugins/datatables/jquery.dataTables.js"></script>
+    <script src="/static/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="/static/js/metronic.js"></script>
+    <script src="/static/js/table-ext.js"></script>
+    <script src="/static/js/datatable.js"></script>
+    <script src="/static/js/echarts.min.js" charset="utf-8" type="text/javascript"></script>
+    <script>
+        var result_json = $("#result").val();
+        var results =  JSON.parse(result_json);
+        var i=0;
+        len = results.length;
+        for (;i<len;i++)
+            showchart('chart'+results[i]['pic_name'], results[i]['result_dict']);   //图表执行
+
+        function showchart(id, result) {
+            var myChart = echarts.init(document.getElementById(id));
+            option = {
+                tooltip: {trigger: 'item'},
+                xAxis: [{show: false, type: 'value', position: 'top'
+                    }],
+                yAxis: [{
+                        type: 'category',
+                        data: ['高兴', '中性', '惊讶', '悲伤', '厌恶', '恐惧', '愤怒'],
+                        axisLine: {show: false},     //坐标轴
+                        axisTick: [{show: false}],
+                        axisLabel: {textStyle: {fontSize: '16'}}
+                    }],
+                series: [
+                    {   type: 'bar',
+                        tooltip: {show: false},
+                        barMinHeight: 10,  //最小柱高
+                        barWidth: 10,  //柱宽度
+                        barMaxWidth: 40,   //最大柱宽度
+                        data: [result['happy'], result['neutral'], result['surprise'], result['sad'],
+                                result['disgust'], result['fear'], result['angry']],
+                        itemStyle: {
+                            normal: {
+                                color: '#ff6600',
+                                label: {show: true, position: 'right',
+                                    textStyle: {color: '#000', fontSize: '15'}}}}
+                    }]};
+            myChart.setOption(option);}
+    </script>
+{% endblock %}
+
